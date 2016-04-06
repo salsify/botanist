@@ -1,4 +1,4 @@
-# Botanist
+# Botanist [![Build Status](https://travis-ci.org/salsify/botanist.svg?branch=master)](https://travis-ci.org/salsify/botanist)
 
 A JavaScript DSL for taming tree structures using rules about the parts they're composed from. Inspired by Parslet's [Transforms](http://kschiess.github.io/parslet/transform.html), Botanist allows you to define a transformation over arbitrarily complex data by describing the structure of the specific constituents that you're interested in.
 
