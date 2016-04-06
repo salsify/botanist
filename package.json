@@ -1,0 +1,29 @@
+{
+  "name": "botanist",
+  "version": "1.0.0",
+  "description": "A DSL for traversing and transforming tree structures based on structural rules",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "rm -rf lib/* && babel --out-dir lib src",
+    "test": "eslint . && mocha --compilers js:babel/register",
+    "prepublish": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/salsify/botanist.git"
+  },
+  "author": "Dan Freeman",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/salsify/botanist/issues"
+  },
+  "homepage": "https://github.com/salsify/botanist#readme",
+  "devDependencies": {
+    "babel": "^5.8.38",
+    "babel-eslint": "^6.0.2",
+    "chai": "^3.5.0",
+    "eslint": "^2.5.3",
+    "mocha": "^2.4.5",
+    "sinon": "^1.17.3"
+  }
+}
