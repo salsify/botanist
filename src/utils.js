@@ -17,7 +17,7 @@ export function isArray(value) {
  * Indicates whether the given value is a POJO, typically created via an object literal.
  */
 export function isObject(value) {
-  if (!value || typeof value === 'number' || typeof value === 'boolean') return false;
+  if (!value || typeof value !== 'object') return false;
 
   let proto = Object.getPrototypeOf(value);
   return proto === null || proto === Object.prototype;

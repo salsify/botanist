@@ -14,7 +14,7 @@ describe('rules', () => {
     let rules = [
       { match: node => 'length' in node, transform: () => [2, 1] },
       { match: node => 'flag' in node, transform: () => ({ flag: false }) },
-      { match: node => 'a' in node, transform: (_, { a, b }) => ({ a: b, b: a }) }
+      { match: node => 'a' in node, transform: (bound, options, { a, b }) => ({ a: b, b: a }) }
     ];
 
     assert.deepEqual(applyRules(object, rules), {

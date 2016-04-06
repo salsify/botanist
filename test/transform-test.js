@@ -19,6 +19,31 @@ describe('ASTTransform', () => {
     assert.deepEqual(testTransform(nonmatch), nonmatch);
   });
 
+  it('passes through given options', () => {
+    const testTransform = transform({
+      @rule({ x: 1, y: 2 })
+      xAndY(_, { xAndYValue }) {
+        return xAndYValue;
+      },
+
+      @rule({ z: 3 })
+      z(_, { zValue }) {
+        return zValue;
+      }
+    });
+
+    const input = { left: { x: 1, y: 2 }, right: { z: 3 } };
+    assert.deepEqual(testTransform(input, { xAndYValue: true, zValue: false }), {
+      left: true,
+      right: false
+    });
+
+    assert.deepEqual(testTransform(input, { xAndYValue: 'hello', zValue: 'goodbye' }), {
+      left: 'hello',
+      right: 'goodbye'
+    });
+  });
+
   it('handles simple binding', () => {
     let testTransform = transform({
       @rule({ x: simple('foo'), y: simple('bar') })
