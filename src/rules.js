@@ -8,9 +8,9 @@ import { isObject, isArray } from './utils';
 export function applyRules(ast, rules, options) {
   if (isObject(ast)) {
     let result = Object.create(null);
-    for (let key of Object.keys(ast)) {
+    Object.keys(ast).forEach((key) => {
       result[key] = applyRules(ast[key], rules, options);
-    }
+    });
     return applyMatchingRule(result, rules, options);
   } else if (isArray(ast)) {
     let result = ast.map(node => applyRules(node, rules, options));
@@ -61,7 +61,8 @@ const RULES = '__botanist-rules';
 // Find a rule matching the given node and apply it, or just return the node
 function applyMatchingRule(node, rules, options) {
   let context = new Context();
-  for (let rule of rules) {
+  for (let i = 0, len = rules.length; i < len; i++) {
+    let rule = rules[i];
     if (rule.match(node, context)) {
       return rule.transform.call(null, context.expose(), options, node);
     }
