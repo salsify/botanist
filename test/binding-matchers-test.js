@@ -3,7 +3,7 @@ import { assert } from 'chai';
 
 import flattenPrototype from './helpers/flatten-prototype';
 import Context from '../lib/context';
-import { simple, sequence, match, subtree } from '../lib/binding-matchers';
+import { simple, sequence, match, subtree, choice } from '../lib/binding-matchers';
 
 describe('Binding matchers', () => {
   describe('simple()', () => {
@@ -22,6 +22,32 @@ describe('Binding matchers', () => {
       assertNoMatch(simple, { x: 1, y: 2 });
       assertNoMatch(simple, []);
       assertNoMatch(simple, {});
+    });
+  });
+
+  describe('choice()', () => {
+    let oneOf = options => name => choice(options, name);
+
+    it('accepts the right stuff', () => {
+      assertMatch(oneOf([null, undefined]), null);
+      assertMatch(oneOf([null, undefined]), undefined);
+      assertMatch(oneOf([true, false]), false);
+      assertMatch(oneOf([true, false]), true);
+      assertMatch(oneOf(['hello']), 'hello');
+      assertMatch(oneOf([87]), 87);
+    });
+
+    it('rejects the right stuff', () => {
+      assertNoMatch(oneOf([1, 2, 3]), 4);
+      assertNoMatch(oneOf([1, 2, 3]), '1');
+      assertNoMatch(oneOf([null, false]), undefined);
+      assertNoMatch(oneOf([null, false]), '');
+      assertNoMatch(oneOf([null, false]), []);
+      assertNoMatch(oneOf([]), null);
+      assertNoMatch(oneOf([]), undefined);
+      assertNoMatch(oneOf([]), false);
+      assertNoMatch(oneOf([]), '');
+      assertNoMatch(oneOf([]), []);
     });
   });
 

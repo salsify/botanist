@@ -125,6 +125,31 @@ Many use cases for Botanist involve taking a JSON-compatible object and either d
 - `[]`
 - `{}`
 
+### `choice(options, name)`
+The `choice` matcher will bind any `simple` value that is present in a given list of options.
+
+#### Sample Values `choice` Will Match
+- `choice([1, 2, 3])`
+  - `1`
+  - `2`
+  - `3`
+- `choice(['hello'])`
+  - `'hello'`
+
+#### Sample Values `choice` Will Not Match
+- `choice([1, 2, 3])`
+  - `4`
+  - `'1'`
+- `choice([null, false])`
+  - `undefined`
+  - `''`
+  - `[]`
+- `choice([])`
+  - `null`
+  - `undefined`
+  - `''`
+  - `[]`
+
 ### `sequence(name)`
 The `sequence` matcher will bind an array of `simple` elements to the given name.
 
@@ -143,14 +168,14 @@ The `sequence` matcher will bind an array of `simple` elements to the given name
 The `match` matcher accepts a regular expression, and will bind an array of captured strings to the given name. The final element of the array will be the full matched string.
 
 #### Sample Values `match` Will Match
-- `/foo(bar|baz)/`
+- `match(/foo(bar|baz)/)`
   - `'foobar'` => `['bar', 'foobar']`
   - `'foobaz'` => `['baz', 'foobaz']`
   - `'abcfoobardef'` => `['bar', 'foobar']`
-- `/\d+/`
+- `match(/\d+/)`
   - `'123'` => `['123']`
   - `123` => `['123']`
-- `/.*/`
+- `match(/.*/)`
   - `undefined` => `['undefined']`
   - `null` => `['null']`
   - `true` => `['true']`
@@ -159,10 +184,10 @@ The `match` matcher accepts a regular expression, and will bind an array of capt
 Note that `match` will coerce any `simple` value to a string before evaluating whether or not it matches the given regular expression.
 
 #### Sample Values `match` Will Not Match
-- `/foo(bar|baz)/`
+- `match(/foo(bar|baz)/)`
   - `''`
   - `'qux'`
-- `/.*/`
+- `match(/.*/)`
   - `[]`
   - `{}`
 

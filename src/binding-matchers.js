@@ -19,6 +19,25 @@ export function simple(name) {
 }
 
 /**
+ * Matches any simple value that is in the given list.
+ *
+ * @rule({ measure: simple('measure'), unit: choice(['in', 'ft'], 'unit') })
+ * convertToMetric({ measure, unit }) {
+ *   let factor = unit === 'ft' ? 30.48 : 2.54;
+ *   return { measure: measure * factor, unit: 'cm' };
+ * }
+ *
+ * Input:  { measure: 3, unit: 'in' }
+ * Output: { measure: 7.62, unit: 'cm' }
+ *
+ * Input:  { measure: 3, unit: 'cm' }
+ * Output: { measure: 3, unit: 'cm' }
+ */
+export function choice(options, name) {
+  return binder(name, node => isSimple(node) && options.indexOf(node) !== -1 ? node : NO_MATCH);
+}
+
+/**
  * Matches any string that matches the given regex, binding the results of that
  * regex's execution to the given name.
  *
