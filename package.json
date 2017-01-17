@@ -6,7 +6,7 @@
   "scripts": {
     "build": "rm -rf lib/* && babel --out-dir lib src",
     "test": "eslint . && mocha --compilers js:babel/register",
-    "prepublish": "npm run build"
+    "prepublish": "yarn run build"
   },
   "repository": {
     "type": "git",
@@ -20,10 +20,10 @@
   "homepage": "https://github.com/salsify/botanist#readme",
   "devDependencies": {
     "babel": "^5.8.38",
-    "babel-eslint": "^6.0.2",
+    "babel-eslint": "^7.1.1",
     "chai": "^3.5.0",
-    "eslint": "^2.5.3",
-    "mocha": "^2.4.5",
+    "eslint": "^3.13.1",
+    "mocha": "^3.2.0",
     "sinon": "^1.17.3"
   }
 }
