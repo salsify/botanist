@@ -1,6 +1,6 @@
 import { applyRules, extractRules, memoizeRule, compileRule } from './rules';
 
-export { simple, match, sequence, subtree } from './binding-matchers';
+export { simple, match, sequence, subtree, choice } from './binding-matchers';
 
 export function transform(ruleSpecs) {
   let rules = extractRules(ruleSpecs);
