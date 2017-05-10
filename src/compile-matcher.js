@@ -1,4 +1,5 @@
 import { isArray, isObject, isFunction } from './utils';
+import { OBJECT_REST, ARRAY_REST } from './rest';
 
 /**
  * Given a specification for a matcher, compiles that spec into a function that will
@@ -20,29 +21,45 @@ export default function compileMatcher(spec) {
   }
 }
 
-function buildObjectMatcher(object) {
-  let requiredKeys = Object.keys(object).sort();
-  let matchers = requiredKeys.map(key => compileMatcher(object[key]));
+function buildObjectMatcher(spec) {
+  let specKeys = Object.keys(spec).filter(key => key !== OBJECT_REST).sort();
+  let matchers = specKeys.map(key => compileMatcher(spec[key]));
 
   return (node, context) => {
     if (!node || typeof node !== 'object') return false;
-    let actualKeys = Object.keys(node).sort();
-    if (!arrayEqual(requiredKeys, actualKeys)) return false;
-    return matchAll(context, matchers, requiredKeys.map(key => node[key]));
+
+    let allKeys = Object.keys(node);
+    let requiredKeys = allKeys.filter(key => key in spec).sort();
+
+    if (!(allKeys.length === requiredKeys.length || OBJECT_REST in spec)) return false;
+
+    if (matchAll(context, matchers, requiredKeys.map(key => node[key]))) {
+      let restName = spec[OBJECT_REST];
+      if (restName) {
+        return context.bind(restName, extractObjectRest(spec, node, allKeys));
+      } else {
+        return true;
+      }
+    }
   };
 }
 
 function buildArrayMatcher(spec) {
-  let matchers = spec.map(value => compileMatcher(value));
-  return (node, context) => isArray(node) && matchAll(context, matchers, node);
-}
+  let { items, restSigil } = normalizeArraySpec(spec);
+  let matchers = items.map(value => compileMatcher(value));
 
-function arrayEqual(left, right) {
-  if (left.length !== right.length) return false;
-  for (let i = 0, len = left.length; i < len; i++) {
-    if (left[i] !== right[i]) return false;
-  }
-  return true;
+  return (node, context) => {
+    if (!isArray(node)) return false;
+
+    let requiredItems = restSigil ? node.slice(0, matchers.length) : node;
+    if (matchAll(context, matchers, requiredItems)) {
+      if (restSigil && restSigil[ARRAY_REST]) {
+        return context.bind(restSigil[ARRAY_REST], node.slice(matchers.length));
+      } else {
+        return true;
+      }
+    }
+  };
 }
 
 function matchAll(context, matchers, values) {
@@ -55,4 +72,27 @@ function matchAll(context, matchers, values) {
   provisionalContext.commit();
 
   return true;
+}
+
+function extractObjectRest(spec, node, keys) {
+  let result = Object.create(null);
+  keys.forEach((key) => {
+    if (!(key in spec)) {
+      result[key] = node[key];
+    }
+  });
+  return result;
+}
+
+function normalizeArraySpec(spec) {
+  let items = spec;
+  let restSigil = null;
+
+  let lastItem = items[spec.length - 1];
+  if (isObject(lastItem) && ARRAY_REST in lastItem) {
+    items = items.slice(0, -1);
+    restSigil = lastItem;
+  }
+
+  return { items, restSigil };
 }

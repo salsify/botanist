@@ -3,7 +3,7 @@ import { assert } from 'chai';
 
 import flattenPrototype from './helpers/flatten-prototype';
 
-import { simple } from '../lib';
+import { simple, rest } from '../lib';
 import Context from '../lib/context';
 import compileMatcher from '../lib/compile-matcher';
 
@@ -70,6 +70,28 @@ describe('compile-matcher', () => {
     assert.deepEqual(flattenPrototype(failureContext.expose()), {});
   });
 
+  it('can compile an array matcher with a rest matcher', () => {
+    let match = compileMatcher([simple('x'), ...rest('remainder')]);
+    let successContext = new Context();
+    assert.ok(match([1, 2, 3], successContext));
+    assert.deepEqual(flattenPrototype(successContext.expose()), { x: 1, remainder: [2, 3] });
+
+    let failureContext = new Context();
+    assert.notOk(match([{}, 2, 3], failureContext));
+    assert.deepEqual(flattenPrototype(failureContext.expose()), {});
+  });
+
+  it('can compile an array matcher with an unbound rest matcher', () => {
+    let match = compileMatcher([simple('x'), ...rest()]);
+    let successContext = new Context();
+    assert.ok(match([1, 2, 3], successContext));
+    assert.deepEqual(flattenPrototype(successContext.expose()), { x: 1 });
+
+    let failureContext = new Context();
+    assert.notOk(match([{}, 2, 3], failureContext));
+    assert.deepEqual(flattenPrototype(failureContext.expose()), {});
+  });
+
   it('can compile an exact object matcher', () => {
     let match = compileMatcher({ foo: 1, bar: true, baz: 'three' });
     let context = new Context();
@@ -96,6 +118,28 @@ describe('compile-matcher', () => {
 
     let failureContext = new Context();
     assert.notOk(match({ foo: 1, bar: 2, baz: 3 }, failureContext));
+    assert.deepEqual(flattenPrototype(failureContext.expose()), {});
+  });
+
+  it('can compile an object matcher with a rest matcher', () => {
+    let match = compileMatcher({ foo: simple('x'), ...rest('remainder') });
+    let successContext = new Context();
+    assert.ok(match({ foo: 1, bar: 2, baz: 3 }, successContext));
+    assert.deepEqual(flattenPrototype(successContext.expose()), { x: 1, remainder: { bar: 2, baz: 3 } });
+
+    let failureContext = new Context();
+    assert.notOk(match({ bar: 2, baz: 3 }, failureContext));
+    assert.deepEqual(flattenPrototype(failureContext.expose()), {});
+  });
+
+  it('can compile an object matcher with an unbound rest matcher', () => {
+    let match = compileMatcher({ foo: simple('x'), ...rest() });
+    let successContext = new Context();
+    assert.ok(match({ foo: 1, bar: 2, baz: 3 }, successContext));
+    assert.deepEqual(flattenPrototype(successContext.expose()), { x: 1 });
+
+    let failureContext = new Context();
+    assert.notOk(match({ bar: 2, baz: 3 }, failureContext));
     assert.deepEqual(flattenPrototype(failureContext.expose()), {});
   });
 });

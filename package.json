@@ -3,6 +3,7 @@
   "version": "1.1.1",
   "description": "A DSL for traversing and transforming tree structures based on structural rules",
   "main": "lib/index.js",
+  "module": "src/index.js",
   "scripts": {
     "build": "rm -rf lib/* && babel --out-dir lib src",
     "test": "eslint . && mocha --compilers js:babel/register",
