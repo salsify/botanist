@@ -73,6 +73,54 @@ Note that you may bind two different fields in a single rule to the same name. I
 
 More information about `simple` and the other available matchers can be found in a [dedicated section](#available-matchers) below.
 
+### Relaxing Structural Restrictions
+
+By default, `@rule({ tag: 'important' })` will only match objects whose _only_ key is `tag` with the value `'important'`. What if we want to match any object tagged as important, regardless of the rest of its structure? Enter `rest()`.
+
+```js
+import { transform, rule, rest } from 'botanist';
+
+let emphasizeImportantThings = transform({
+  @rule({ tag: 'important', ...rest('item') })
+  emphasizeIt({ item }) {
+    let result = {};
+    for (let [key, value] of Object.entries(item)) {
+      result[key.toUpperCase()] = `${value}`.toUpperCase();
+    }
+    return result;
+  }
+});
+
+emphasizeImportantThings([
+  { tag: 'important', message: 'uh oh' },
+  { tag: 'snoozed', key: 'nbd' },
+  { tag: 'important', subject: 'hi', content: 'are you there?' }
+]);
+// => [{ MESSAGE: 'UH OH' }, { tag: 'snoozed', key: 'nbd' }, { SUBJECT: 'HI', CONTENT: 'ARE YOU THERE?' }]
+```
+
+You can also use `rest` to bind the remaining elements of an array:
+
+```js
+import { transform, rule, simple, rest } from 'botanist';
+
+let queenOfHearts = transform({
+  @rule([simple('head'), ...rest('tail')])
+  offWithIt({ head, tail }) {
+    return { head, tail };
+  }
+});
+
+queenOfHearts([1, 2, 3, 4, 5]);
+// => { head: 1, tail: [2, 3, 4, 5] }
+```
+
+If you're operating in an environment without the `...` spread operator, `rest` also has an ES5-compatible usage pattern where it wraps the pattern in question instead of spreading into it.
+
+For objects, rather than writing `{ x: 'y', ...rest('remainder') }`, you'd write `rest({ x: 'y' }, 'remainder')`.
+
+For arrays, `[1, 2, ...rest('remainder')]` becomes `rest([1, 2], 'remainder')`.
+
 ### Rule Interactions
 
 Rules are applied in the order given, so if two rules could both match the same object, the first one will "win" and be applied. Rules are also applied from the bottom up, so all properties of an object will be considered and potentially transformed before the object itself is evaluated.

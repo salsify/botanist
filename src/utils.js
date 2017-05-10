@@ -29,3 +29,10 @@ export function isObject(value) {
 export function isFunction(value) {
   return typeof value === 'function';
 }
+
+/**
+ * Indicates whether the given value is a string.
+ */
+export function isString(value) {
+  return typeof value === 'string';
+}
