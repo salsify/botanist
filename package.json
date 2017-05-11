@@ -10,7 +10,7 @@
     "build:es5": "babel --out-dir lib src",
     "build:umd": "webpack lib dist/botanist.umd.js --output-library-target umd",
     "test": "eslint . && mocha --compilers js:babel/register",
-    "prepublish": "yarn run build"
+    "prepare": "yarn run build"
   },
   "repository": {
     "type": "git",
