@@ -240,7 +240,7 @@ Note that `match` will coerce any `simple` value to a string before evaluating w
   - `{}`
 
 ### `subtree(name)`
-The `subtree` matcher binds any value to the given name, including arrays and POJOs. Use with caution, as this escape valve has the potential to be a footgun.
+The `subtree` matcher binds any value to the given name, including arrays and POJOs. Use with caution, as this escape valve has the potential to be a footgun. If you know anything about the structure you're attempting to match, you're probably better off using `rest`, but if you truly want to match anything, `subtree` is an efficient way to do it.
 
 ## Transform Options
 When running a transform, you can pass a second argument if you want to be able to customize its behavior. This value will be exposed to every rule function as it executes.
