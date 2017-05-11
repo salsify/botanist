@@ -5,7 +5,10 @@
   "main": "lib/index.js",
   "module": "src/index.js",
   "scripts": {
-    "build": "rm -rf lib/* && babel --out-dir lib src",
+    "build": "yarn run build:clean && yarn run build:es5 && yarn run build:umd",
+    "build:clean": "rm -rf lib dist",
+    "build:es5": "babel --out-dir lib src",
+    "build:umd": "webpack lib dist/botanist.umd.js --output-library-target umd",
     "test": "eslint . && mocha --compilers js:babel/register",
     "prepublish": "yarn run build"
   },
@@ -25,6 +28,7 @@
     "chai": "^3.5.0",
     "eslint": "^3.13.1",
     "mocha": "^3.2.0",
-    "sinon": "^1.17.3"
+    "sinon": "^1.17.3",
+    "webpack": "^2.5.1"
   }
 }
