@@ -3,20 +3,20 @@ import compileMatcher from './compile-matcher';
 import { isObject, isArray } from './utils';
 
 /**
- * Recursively applies the given set of rules to the given AST.
+ * Recursively applies the given set of rules to the given object.
  */
-export function applyRules(ast, rules, options) {
-  if (isObject(ast)) {
-    let result = Object.create(null);
-    Object.keys(ast).forEach((key) => {
-      result[key] = applyRules(ast[key], rules, options);
+export function applyRules(object, rules, options) {
+  if (isObject(object)) {
+    let result = Object.getPrototypeOf(object) ? {} : Object.create(null);
+    Object.keys(object).forEach((key) => {
+      result[key] = applyRules(object[key], rules, options);
     });
     return applyMatchingRule(result, rules, options);
-  } else if (isArray(ast)) {
-    let result = ast.map(node => applyRules(node, rules, options));
+  } else if (isArray(object)) {
+    let result = object.map(node => applyRules(node, rules, options));
     return applyMatchingRule(result, rules, options);
   } else {
-    return ast;
+    return object;
   }
 }
 

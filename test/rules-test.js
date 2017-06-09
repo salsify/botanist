@@ -23,6 +23,14 @@ describe('rules', () => {
     });
   });
 
+  it('matches prototype behavior for input objects', () => {
+    let standard = { key: [1, 2, 3] };
+    let prototypeless = Object.assign(Object.create(null), standard);
+
+    assert.equal(Object.getPrototypeOf(applyRules(standard, [])), Object.prototype);
+    assert.equal(Object.getPrototypeOf(applyRules(prototypeless, [])), null);
+  });
+
   it('can be recorded on and extracted from an object', () => {
     let rootRule = { flipKeys: sinon.spy() };
     let flipKeysMatcher = sinon.spy();

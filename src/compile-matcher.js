@@ -75,7 +75,7 @@ function matchAll(context, matchers, values) {
 }
 
 function extractObjectRest(spec, node, keys) {
-  let result = Object.create(null);
+  let result = {};
   keys.forEach((key) => {
     if (!(key in spec)) {
       result[key] = node[key];

@@ -126,6 +126,7 @@ describe('compile-matcher', () => {
     let successContext = new Context();
     assert.ok(match({ foo: 1, bar: 2, baz: 3 }, successContext));
     assert.deepEqual(flattenPrototype(successContext.expose()), { x: 1, remainder: { bar: 2, baz: 3 } });
+    assert.equal(successContext.expose().remainder.toString(), '[object Object]');
 
     let failureContext = new Context();
     assert.notOk(match({ bar: 2, baz: 3 }, failureContext));
