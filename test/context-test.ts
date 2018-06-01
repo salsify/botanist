@@ -3,7 +3,7 @@ import { assert } from 'chai';
 
 import flattenPrototype from './helpers/flatten-prototype';
 
-import Context from '../lib/context';
+import Context from '../src/context';
 
 describe('Context', () => {
   it('exposes simple bindings', () => {

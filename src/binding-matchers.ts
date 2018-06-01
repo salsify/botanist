@@ -1,4 +1,6 @@
 import { isArray, isSimple } from './utils';
+import Context from './context';
+import { Matcher } from './compile-matcher';
 
 /**
  * Matches any simple value and binds it to the given name in the rule handler.
@@ -14,7 +16,9 @@ import { isArray, isSimple } from './utils';
  * Input:  { foo: { key: 'one' }, bar: { key: 'two' } }
  * Output: { foo: { key: 'ONE' }, bar: { key: 'TWO' } }}
  */
-export function simple(name) {
+export function simple<Name extends string>(name: Name): Matcher<{ [key in Name]: any }>;
+export function simple(): Matcher;
+export function simple(name?: string) {
   return binder(name, node => isSimple(node) ? node : NO_MATCH);
 }
 
@@ -33,7 +37,9 @@ export function simple(name) {
  * Input:  { measure: 3, unit: 'cm' }
  * Output: { measure: 3, unit: 'cm' }
  */
-export function choice(options, name) {
+export function choice<Name extends string, T>(options: T[], name: Name): Matcher<{ [key in Name]: T }>;
+export function choice(options: any[]): Matcher;
+export function choice(options: any[], name?: string) {
   return binder(name, node => isSimple(node) && options.indexOf(node) !== -1 ? node : NO_MATCH);
 }
 
@@ -49,7 +55,9 @@ export function choice(options, name) {
  * Input:  { foo: { key: 'fooqux' } }
  * Output: { foo: { first: 'foo', second: 'qux', everything: 'fooqux' } }
  */
-export function match(regex, name) {
+export function match<Name extends string>(regex: RegExp, name: Name): Matcher<{ [key in Name]: string[] }, { [key in Name]: any }>;
+export function match(regex: RegExp): Matcher;
+export function match(regex: RegExp, name?: string) {
   return binder(name, (node) => {
     let matchResult;
     if (isSimple(node) && (matchResult = regex.exec(node))) {
@@ -71,7 +79,9 @@ export function match(regex, name) {
  * Input:  { numbers: [1, 2, 3] }
  * Output: { numbers: [2, 3, 4] }
  */
-export function sequence(name) {
+export function sequence<Name extends string>(name: Name): Matcher<{ [key in Name]: any[] }>;
+export function sequence(): Matcher;
+export function sequence(name?: string) {
   return binder(name, node => isArray(node) && node.every(isSimple) ? node : NO_MATCH);
 }
 
@@ -92,15 +102,17 @@ export function sequence(name) {
  *  Input:  { root: { key: 'hello' } }
  *  Output: { root: ['HELLO'] }
  */
-export function subtree(name) {
+export function subtree<Name extends string>(name: Name): Matcher<{ [key in Name]: any }>;
+export function subtree(): Matcher;
+export function subtree(name?: string) {
   return binder(name, node => node);
 }
 
 
 const NO_MATCH = Object.freeze({});
 
-function binder(name, test) {
-  return (node, context) => {
+function binder<Name extends string>(name: Name | undefined, test: (node: any) => any) {
+  return (node: any, context: Context) => {
     let result = test(node);
     if (result !== NO_MATCH) {
       return !name || context.bind(name, result);

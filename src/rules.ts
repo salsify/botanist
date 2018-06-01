@@ -1,11 +1,17 @@
 import Context from './context';
-import compileMatcher from './compile-matcher';
+import compileMatcher, { Matcher } from './compile-matcher';
 import { isObject, isArray } from './utils';
+
+export type Transform<Options> = (vars: any, options: Options, node: any) => any;
+export interface Rule<Options> {
+  match: Matcher,
+  transform: Transform<Options>
+}
 
 /**
  * Recursively applies the given set of rules to the given object.
  */
-export function applyRules(object, rules, options) {
+export function applyRules<Options>(object: any, rules: Rule<Options>[], options: Options): any {
   if (isObject(object)) {
     let result = Object.getPrototypeOf(object) ? {} : Object.create(null);
     Object.keys(object).forEach((key) => {
@@ -24,7 +30,7 @@ export function applyRules(object, rules, options) {
  * Given an object or array containing a combination of rule definitions and other such
  * arrays/objects, returns a flattened array of canonicalized rules.
  */
-export function extractRules(object) {
+export function extractRules<Options = any>(object: any): Array<Rule<Options>> {
   let rules = rulesFromObject(object);
   if (!isArray(rules)) return [object];
 
@@ -38,7 +44,7 @@ export function extractRules(object) {
 /**
  * Given a matcher spec and a transform function, immediately compiles the pair into a rule.
  */
-export function compileRule(spec, transform) {
+export function compileRule<Options>(spec: any, transform: Transform<Options>): Rule<Options> {
   let match = compileMatcher(spec);
   return { match, transform };
 }
@@ -47,7 +53,7 @@ export function compileRule(spec, transform) {
  * Given an object, a matcher spec, and the name of a method on that object representing an
  * AST transform, compiles and stores the matcher on that object for later retrieval.
  */
-export function memoizeRule(object, transformKey, spec) {
+export function memoizeRule(object: any, transformKey: string, spec: any): void {
   if (!(RULES in object)) object[RULES] = [];
 
   let match = compileMatcher(spec);
@@ -56,10 +62,10 @@ export function memoizeRule(object, transformKey, spec) {
 
 // Key where rule annotations are stashed on a decorated object. We don't use a Symbol because
 // they're never exposed in for-in loops, so it makes working with e.g. Ember objects unwieldy.
-const RULES = '__botanist-rules';
+export const RULES = '__botanist-rules';
 
 // Find a rule matching the given node and apply it, or just return the node
-function applyMatchingRule(node, rules, options) {
+function applyMatchingRule<Options>(node: any, rules: Array<Rule<Options>>, options: Options): any {
   let context = new Context();
   for (let i = 0, len = rules.length; i < len; i++) {
     let rule = rules[i];
@@ -71,11 +77,12 @@ function applyMatchingRule(node, rules, options) {
 }
 
 // Extract an array of canonicalized rules from an object
-function rulesFromObject(object) {
+function rulesFromObject<Options>(object: any): Array<Rule<Options>> | undefined {
   if (object[RULES]) {
-    return object[RULES].map(({ match, transformKey }) => ({
+    let rules: Array<{ match: Matcher, transformKey: string }> = object[RULES];
+    return rules.map(({ match, transformKey }) => ({
       match,
-      transform: (...params) => object[transformKey](...params)
+      transform: (...params: any[]) => object[transformKey](...params)
     }));
   } else if (isArray(object)) {
     return object;
