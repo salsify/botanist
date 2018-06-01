@@ -2,9 +2,12 @@
  * Represents the context of bound variables for a given AST matcher.
  */
 export default class Context {
-  constructor(parent = null) {
-    this.parent = parent;
-    this.storage = Object.create(parent && parent.storage);
+  private parent: Context | null;
+  private storage: { [key: string]: any };
+
+  constructor(parent?: Context) {
+    this.parent = parent || null;
+    this.storage = Object.create(parent && parent.storage || null);
   }
 
   /**
@@ -12,11 +15,9 @@ export default class Context {
    * binding was successful (i.e., either the key was previously undefined or it already
    * contained the given value).
    */
-  bind(key, value) {
+  bind(key: string, value: any): boolean {
     if (key in this.storage) {
-      if (this.storage[key] === value) {
-        return true;
-      }
+      return this.storage[key] === value;
     } else {
       this.storage[key] = value;
       return true;
@@ -26,7 +27,7 @@ export default class Context {
   /**
    * Exposes the bound values on this context in a POJO.
    */
-  expose() {
+  expose(): { [key: string]: any } {
     return Object.create(this.storage);
   }
 
@@ -42,8 +43,12 @@ export default class Context {
    * Applies all values bound on this provisional context to the parent that originally begat it.
    */
   commit() {
+    if (!this.parent) {
+      throw new Error('Internal error: unable to apply provisional values from a context with no parent');
+    }
+
     Object.keys(this.storage).forEach((key) => {
-      this.parent.storage[key] = this.storage[key];
+      this.parent!.storage[key] = this.storage[key];
     });
   }
 }

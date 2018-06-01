@@ -2,8 +2,9 @@ import { describe, it } from 'mocha';
 import { assert } from 'chai';
 
 import flattenPrototype from './helpers/flatten-prototype';
-import Context from '../lib/context';
-import { simple, sequence, match, subtree, choice } from '../lib/binding-matchers';
+import Context from '../src/context';
+import { simple, sequence, match, subtree, choice } from '../src/binding-matchers';
+import { Matcher } from '../src/compile-matcher';
 
 describe('Binding matchers', () => {
   describe('simple()', () => {
@@ -26,7 +27,7 @@ describe('Binding matchers', () => {
   });
 
   describe('choice()', () => {
-    let oneOf = options => name => choice(options, name);
+    let oneOf = (options: any[]) => (name: string) => choice(options, name);
 
     it('accepts the right stuff', () => {
       assertMatch(oneOf([null, undefined]), null);
@@ -69,7 +70,7 @@ describe('Binding matchers', () => {
   });
 
   describe('match()', () => {
-    let matchRegex = regex => name => match(regex, name);
+    let matchRegex = (regex: RegExp) => (name: string) => match(regex, name);
 
     it('accepts the right stuff', () => {
       assertMatch(matchRegex(/b/), 'abc', ['b']);
@@ -111,7 +112,7 @@ describe('Binding matchers', () => {
   });
 });
 
-function assertMatch(matcher, node, boundValue) {
+function assertMatch(matcher: (key: string) => Matcher, node: any, boundValue?: any) {
   let context = new Context();
   assert.ok(matcher('binding')(node, context));
 
@@ -124,7 +125,7 @@ function assertMatch(matcher, node, boundValue) {
   }
 }
 
-function assertNoMatch(matcher, node) {
+function assertNoMatch(matcher: (key: string) => Matcher, node: any) {
   let context = new Context();
   assert.notOk(matcher('binding')(node, context));
 

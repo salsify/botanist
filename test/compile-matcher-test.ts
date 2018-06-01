@@ -3,43 +3,48 @@ import { assert } from 'chai';
 
 import flattenPrototype from './helpers/flatten-prototype';
 
-import { simple, rest } from '../lib';
-import Context from '../lib/context';
-import compileMatcher from '../lib/compile-matcher';
+import { simple, rest } from '../src/index';
+import Context from '../src/context';
+import compileMatcher from '../src/compile-matcher';
 
 describe('compile-matcher', () => {
   it('can compile a null matcher', () => {
     let match = compileMatcher(null);
-    assert.ok(match(null));
-    assert.notOk(match());
-    assert.notOk(match(false));
+    let ctx = new Context();
+    assert.ok(match(null, ctx));
+    assert.notOk(match(undefined, ctx));
+    assert.notOk(match(false, ctx));
   });
 
   it('can compile a boolean matcher', () => {
     let match = compileMatcher(false);
-    assert.ok(match(false));
-    assert.notOk(match(true));
-    assert.notOk(match(null));
+    let ctx = new Context();
+    assert.ok(match(false, ctx));
+    assert.notOk(match(true, ctx));
+    assert.notOk(match(null, ctx));
   });
 
   it('can compile a number matcher', () => {
     let match = compileMatcher(3);
-    assert.ok(match(3));
-    assert.notOk(match(1));
-    assert.notOk(match('3'));
+    let ctx = new Context();
+    assert.ok(match(3, ctx));
+    assert.notOk(match(1, ctx));
+    assert.notOk(match('3', ctx));
   });
 
   it('can compile a string matcher', () => {
     let match = compileMatcher('5');
-    assert.ok(match('5'));
-    assert.notOk(match('hello'));
-    assert.notOk(match(5));
+    let ctx = new Context();
+    assert.ok(match('5', ctx));
+    assert.notOk(match('hello', ctx));
+    assert.notOk(match(5, ctx));
   });
 
   it('can handle a precompiled matcher', () => {
-    let match = compileMatcher(item => item === 5);
-    assert.ok(match(5));
-    assert.notOk(match(10));
+    let match = compileMatcher((item: any) => item === 5);
+    let ctx = new Context();
+    assert.ok(match(5, ctx));
+    assert.notOk(match(10, ctx));
   });
 
   it('can compile an exact array matcher', () => {

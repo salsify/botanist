@@ -1,5 +1,10 @@
 import { isArray, isObject, isFunction } from './utils';
 import { OBJECT_REST, ARRAY_REST } from './rest';
+import Context from './context';
+
+export type Matcher<Mappings = {}, MatchTypes = Mappings> =
+  & { __capture__?: Mappings, __match__?: MatchTypes }
+  & ((node: any, context: Context) => boolean | undefined);
 
 /**
  * Given a specification for a matcher, compiles that spec into a function that will
@@ -9,7 +14,7 @@ import { OBJECT_REST, ARRAY_REST } from './rest';
  * If the matcher returns true and the spec included binding directives, the context
  * will also be updated with bound values for those directives.
  */
-export default function compileMatcher(spec) {
+export default function compileMatcher(spec: any): Matcher {
   if (isArray(spec)) {
     return buildArrayMatcher(spec);
   } else if (isObject(spec)) {
@@ -21,7 +26,7 @@ export default function compileMatcher(spec) {
   }
 }
 
-function buildObjectMatcher(spec) {
+function buildObjectMatcher(spec: { [key: string]: any }): Matcher {
   let specKeys = Object.keys(spec).filter(key => key !== OBJECT_REST).sort();
   let matchers = specKeys.map(key => compileMatcher(spec[key]));
 
@@ -44,7 +49,7 @@ function buildObjectMatcher(spec) {
   };
 }
 
-function buildArrayMatcher(spec) {
+function buildArrayMatcher(spec: any[]): Matcher {
   let { items, restSigil } = normalizeArraySpec(spec);
   let matchers = items.map(value => compileMatcher(value));
 
@@ -62,7 +67,7 @@ function buildArrayMatcher(spec) {
   };
 }
 
-function matchAll(context, matchers, values) {
+function matchAll(context: Context, matchers: Matcher[], values: any[]): boolean {
   if (matchers.length !== values.length) return false;
 
   let provisionalContext = context.createProvisionalContext();
@@ -74,24 +79,23 @@ function matchAll(context, matchers, values) {
   return true;
 }
 
-function extractObjectRest(spec, node, keys) {
-  let result = {};
-  keys.forEach((key) => {
+function extractObjectRest(spec: { [key: string]: any }, node: any, keys: string[]): { [key: string]: any } {
+  return keys.reduce((result, key) => {
     if (!(key in spec)) {
       result[key] = node[key];
     }
-  });
-  return result;
+    return result;
+  }, {} as { [key: string]: any });
 }
 
-function normalizeArraySpec(spec) {
+function normalizeArraySpec(spec: any[]): { items: any[], restSigil: { [ARRAY_REST]: string } | null } {
   let items = spec;
   let restSigil = null;
 
   let lastItem = items[spec.length - 1];
   if (isObject(lastItem) && ARRAY_REST in lastItem) {
     items = items.slice(0, -1);
-    restSigil = lastItem;
+    restSigil = lastItem as { [ARRAY_REST]: string };
   }
 
   return { items, restSigil };
