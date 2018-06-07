@@ -4,6 +4,10 @@ import { CapturedValues, MatchedValue } from './types';
 export { simple, match, sequence, subtree, choice } from './binding-matchers';
 export { default as rest } from './rest';
 
+export { Rule } from './rules';
+export { Matcher } from './compile-matcher';
+export { default as Context } from './context';
+
 export function transform<Options>(ruleSpecs: Array<Rule<Options>> | { [RULES]: Array<Rule<Options>> }):
   undefined extends Options
     ? (node: any, options?: Options) => any
